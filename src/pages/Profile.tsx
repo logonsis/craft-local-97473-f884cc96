@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import TimeManagement from "@/components/TimeManagement";
+import ServiceManagement from "@/components/ServiceManagement";
 import { 
   User, 
   MapPin, 
@@ -219,36 +220,7 @@ const Profile = () => {
                   </TabsContent>
 
                   <TabsContent value="services" className="space-y-4 pt-4">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold">My Services</h3>
-                        <Button size="sm">Add Service</Button>
-                      </div>
-                      <div className="grid gap-4">
-                        {[
-                          { name: "Plumbing Repairs", rate: "₹500/hr", status: "Active" },
-                          { name: "Electrical Work", rate: "₹600/hr", status: "Active" },
-                          { name: "Carpentry", rate: "₹450/hr", status: "Inactive" },
-                        ].map((service, index) => (
-                          <Card key={index}>
-                            <CardContent className="flex items-center justify-between p-4">
-                              <div>
-                                <h4 className="font-medium">{service.name}</h4>
-                                <p className="text-sm text-muted-foreground">{service.rate}</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant={service.status === "Active" ? "default" : "secondary"}>
-                                  {service.status}
-                                </Badge>
-                                <Button variant="ghost" size="sm">
-                                  <Edit2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
+                    <ServiceManagement />
                   </TabsContent>
                 </Tabs>
               </CardContent>
