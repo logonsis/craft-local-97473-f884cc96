@@ -5,6 +5,7 @@ import ServiceCard from "@/components/ServiceCard";
 import GamificationSection from "@/components/GamificationSection";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import BottomNav from "@/components/BottomNav";
 import { Badge } from "@/components/ui/badge";
 import { 
   Wrench, 
@@ -103,7 +104,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       <Navigation />
       <Hero />
       
@@ -197,6 +198,7 @@ const Index = () => {
 
       <Footer />
       <FloatingWhatsApp />
+      <BottomNav />
     </div>
   );
 };
