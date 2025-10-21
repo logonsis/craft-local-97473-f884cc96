@@ -14,7 +14,166 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          related_search_id: string | null
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          related_search_id?: string | null
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          related_search_id?: string | null
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_related_search_id_fkey"
+            columns: ["related_search_id"]
+            isOneToOne: false
+            referencedRelation: "service_searches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          location: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          location?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          location?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      service_searches: {
+        Row: {
+          created_at: string | null
+          id: string
+          location: string | null
+          search_query: string | null
+          searcher_id: string
+          service_category: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          location?: string | null
+          search_query?: string | null
+          searcher_id: string
+          service_category: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          location?: string | null
+          search_query?: string | null
+          searcher_id?: string
+          service_category?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_searches_searcher_id_fkey"
+            columns: ["searcher_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          availability: string | null
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          price_range: string | null
+          provider_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          availability?: string | null
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          price_range?: string | null
+          provider_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          availability?: string | null
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          price_range?: string | null
+          provider_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
