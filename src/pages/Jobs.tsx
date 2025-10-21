@@ -1,0 +1,193 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import Navigation from "@/components/Navigation";
+import BottomNav from "@/components/BottomNav";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Briefcase, Search } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  price_range: string;
+  profiles: {
+    full_name: string;
+    location: string;
+  };
+}
+
+const Jobs = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [services, setServices] = useState<Service[]>([]);
+  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  const categories = [
+    "Plumbing",
+    "Electrical",
+    "Carpentry",
+    "Painting",
+    "Cleaning",
+    "Gardening",
+    "Moving",
+    "Other",
+  ];
+
+  useEffect(() => {
+    checkAuth();
+    fetchServices();
+  }, []);
+
+  useEffect(() => {
+    filterServices();
+  }, [searchQuery, selectedCategory, services]);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+    }
+  };
+
+  const fetchServices = async () => {
+    const { data, error } = await supabase
+      .from("services")
+      .select(`
+        *,
+        profiles (full_name, location)
+      `)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load services",
+        variant: "destructive",
+      });
+    } else {
+      setServices(data || []);
+    }
+  };
+
+  const filterServices = () => {
+    let filtered = services;
+
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(s => s.category === selectedCategory);
+    }
+
+    if (searchQuery) {
+      filtered = filtered.filter(s =>
+        s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredServices(filtered);
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery && selectedCategory === "all") {
+      toast({
+        title: "Search required",
+        description: "Please enter a search term or select a category",
+      });
+      return;
+    }
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase.from("service_searches").insert({
+      searcher_id: user.id,
+      service_category: selectedCategory !== "all" ? selectedCategory : "General",
+      search_query: searchQuery,
+    });
+
+    if (!error) {
+      toast({
+        title: "Search recorded",
+        description: "Service providers have been notified!",
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <Navigation />
+      <main className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
+          <Briefcase className="h-8 w-8" />
+          Find Services
+        </h1>
+
+        <Card className="p-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <Input
+              placeholder="Search for services..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1"
+            />
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={handleSearch} className="w-full md:w-auto">
+              <Search className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+          </div>
+        </Card>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {filteredServices.map((service) => (
+            <Card key={service.id} className="p-4 hover:shadow-lg transition-shadow">
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="font-semibold text-lg">{service.title}</h3>
+                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                  {service.category}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
+              <div className="flex items-center justify-between text-sm">
+                <div>
+                  <p className="font-medium">{service.profiles?.full_name}</p>
+                  <p className="text-muted-foreground">{service.profiles?.location}</p>
+                </div>
+                <p className="font-semibold text-primary">{service.price_range}</p>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {filteredServices.length === 0 && (
+          <Card className="p-8 text-center">
+            <Briefcase className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground">No services found</p>
+          </Card>
+        )}
+      </main>
+      <BottomNav />
+    </div>
+  );
+};
+
+export default Jobs;
