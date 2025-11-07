@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Notifications from "./pages/Notifications";
 import Jobs from "./pages/Jobs";
 import Network from "./pages/Network";
+import ListServices from "./pages/ListServices";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/network" element={<Network />} />
+          <Route path="/list-services" element={<ListServices />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

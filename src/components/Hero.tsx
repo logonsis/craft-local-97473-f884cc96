@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Users, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/90 py-20 lg:py-32">
       <div className="container relative z-10 mx-auto px-4">
@@ -22,11 +25,21 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="lg" variant="secondary" className="w-full sm:w-auto">
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              className="w-full sm:w-auto"
+              onClick={() => navigate("/list-services")}
+            >
               <Users className="mr-2 h-5 w-5" />
               List Your Services
             </Button>
-            <Button size="lg" variant="outline" className="w-full border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 sm:w-auto">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="w-full border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground hover:bg-primary-foreground/20 sm:w-auto"
+              onClick={() => navigate("/jobs")}
+            >
               <Search className="mr-2 h-5 w-5" />
               Find Services
             </Button>
