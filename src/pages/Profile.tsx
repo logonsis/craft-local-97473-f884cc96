@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
@@ -23,9 +26,120 @@ import {
   Camera
 } from "lucide-react";
 
+interface Profile {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  location: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+}
+
 const Profile = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [formData, setFormData] = useState({
+    full_name: "",
+    phone: "",
+    location: "",
+    bio: "",
+  });
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+      return;
+    }
+    fetchProfile(session.user.id);
+  };
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setProfile(data);
+        setFormData({
+          full_name: data.full_name || "",
+          phone: data.phone || "",
+          location: data.location || "",
+          bio: data.bio || "",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to load profile",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!profile) return;
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: formData.full_name,
+          phone: formData.phone,
+          location: formData.location,
+          bio: formData.bio,
+        })
+        .eq("id", profile.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+      setIsEditing(false);
+      fetchProfile(profile.id);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getInitials = () => {
+    if (!formData.full_name) return "U";
+    return formData.full_name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
@@ -39,16 +153,16 @@ const Profile = () => {
               <CardHeader className="text-center">
                 <div className="relative mx-auto mb-4 w-32 h-32">
                   <div className="w-full h-full rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-4xl font-bold text-primary-foreground">
-                    JD
+                    {getInitials()}
                   </div>
                   <button className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
                     <Camera className="h-4 w-4" />
                   </button>
                 </div>
-                <CardTitle className="text-2xl">John Doe</CardTitle>
+                <CardTitle className="text-2xl">{formData.full_name || "User"}</CardTitle>
                 <CardDescription className="flex items-center justify-center gap-1 mt-2">
                   <MapPin className="h-4 w-4" />
-                  Kerala, India
+                  {formData.location || "Location not set"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -68,11 +182,11 @@ const Profile = () => {
                 <div className="space-y-2 pt-4 border-t">
                   <div className="flex items-center gap-2 text-sm">
                     <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>+91 98765 43210</span>
+                    <span>{formData.phone || "No phone number"}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span>john.doe@example.com</span>
+                    <span>{profile?.id || "No email"}</span>
                   </div>
                 </div>
 
@@ -159,7 +273,8 @@ const Profile = () => {
                         <Input
                           id="fullname"
                           placeholder="Your full name"
-                          defaultValue="John Doe"
+                          value={formData.full_name}
+                          onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                           disabled={!isEditing}
                         />
                       </div>
@@ -169,7 +284,8 @@ const Profile = () => {
                           id="phone"
                           type="tel"
                           placeholder="+91 98765 43210"
-                          defaultValue="+91 98765 43210"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                           disabled={!isEditing}
                         />
                       </div>
@@ -179,8 +295,8 @@ const Profile = () => {
                           id="email"
                           type="email"
                           placeholder="your.email@example.com"
-                          defaultValue="john.doe@example.com"
-                          disabled={!isEditing}
+                          value={profile?.id || ""}
+                          disabled
                         />
                       </div>
                       <div className="space-y-2">
@@ -188,7 +304,8 @@ const Profile = () => {
                         <Input
                           id="location"
                           placeholder="City, State"
-                          defaultValue="Kerala, India"
+                          value={formData.location}
+                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                           disabled={!isEditing}
                         />
                       </div>
@@ -199,16 +316,27 @@ const Profile = () => {
                         id="bio"
                         placeholder="Tell us about yourself and your services..."
                         rows={4}
-                        defaultValue="Experienced service provider with 10+ years in multiple trades. Committed to quality work and customer satisfaction."
+                        value={formData.bio}
+                        onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                         disabled={!isEditing}
                       />
                     </div>
                     {isEditing && (
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setIsEditing(false)}>
+                        <Button variant="outline" onClick={() => {
+                          setIsEditing(false);
+                          if (profile) {
+                            setFormData({
+                              full_name: profile.full_name || "",
+                              phone: profile.phone || "",
+                              location: profile.location || "",
+                              bio: profile.bio || "",
+                            });
+                          }
+                        }}>
                           Cancel
                         </Button>
-                        <Button onClick={() => setIsEditing(false)}>
+                        <Button onClick={handleSave}>
                           Save Changes
                         </Button>
                       </div>
