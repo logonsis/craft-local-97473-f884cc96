@@ -73,8 +73,8 @@ const Auth = () => {
 
         if (error) throw error;
         toast({
-          title: "Success",
-          description: "Account created! You can now sign in.",
+          title: "Check your email",
+          description: "We've sent you a confirmation link. Please verify your email to continue.",
         });
       } else {
         const phone = formData.get("phone") as string;
