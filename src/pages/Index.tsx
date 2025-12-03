@@ -1,5 +1,6 @@
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
+import QuickSearch from "@/components/QuickSearch";
 import CategoryCard from "@/components/CategoryCard";
 import ServiceCard from "@/components/ServiceCard";
 import GamificationSection from "@/components/GamificationSection";
@@ -7,7 +8,7 @@ import Footer from "@/components/Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import BottomNav from "@/components/BottomNav";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Wrench, 
   Package, 
   Sprout, 
@@ -107,6 +108,7 @@ const Index = () => {
     <div className="min-h-screen bg-background pb-20">
       <Navigation />
       <Hero />
+      <QuickSearch />
       
       {/* Categories Section */}
       <section id="categories" className="py-16">
