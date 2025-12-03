@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, Home } from "lucide-react";
+import { Link } from "react-router-dom";
 import { z } from "zod";
 
 const signUpEmailSchema = z.object({
@@ -198,7 +199,14 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/20 via-background to-secondary/20 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
+        <CardHeader className="relative">
+          <Link 
+            to="/" 
+            className="absolute right-0 top-0 p-2 text-muted-foreground hover:text-primary transition-colors"
+            title="Go to Home"
+          >
+            <Home className="h-5 w-5" />
+          </Link>
           <CardTitle>Welcome</CardTitle>
           <CardDescription>Sign in or create an account to continue</CardDescription>
         </CardHeader>
