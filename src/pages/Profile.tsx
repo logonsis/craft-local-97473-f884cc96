@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import TimeManagement from "@/components/TimeManagement";
 import ServiceManagement from "@/components/ServiceManagement";
+import BottomNav from "@/components/BottomNav";
 import { 
   User, 
   MapPin, 
@@ -142,7 +143,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 pb-20">
       <Navigation />
       
       <main className="container mx-auto px-4 pt-24 pb-16">
@@ -384,6 +385,7 @@ const Profile = () => {
 
       <Footer />
       <FloatingWhatsApp />
+      <BottomNav />
     </div>
   );
 };
