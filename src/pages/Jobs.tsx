@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, Search } from "lucide-react";
+import { Briefcase, Search, Phone } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Service {
@@ -19,6 +19,7 @@ interface Service {
   profiles: {
     full_name: string;
     location: string;
+    phone: string | null;
   };
 }
 
@@ -63,7 +64,7 @@ const Jobs = () => {
       .from("services")
       .select(`
         *,
-        profiles (full_name, location)
+        profiles (full_name, location, phone)
       `)
       .order("created_at", { ascending: false });
 
@@ -168,13 +169,26 @@ const Jobs = () => {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-sm mb-3">
                 <div>
                   <p className="font-medium">{service.profiles?.full_name}</p>
                   <p className="text-muted-foreground">{service.profiles?.location}</p>
                 </div>
                 <p className="font-semibold text-primary">{service.price_range}</p>
               </div>
+              {service.profiles?.phone && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  asChild
+                >
+                  <a href={`tel:${service.profiles.phone}`}>
+                    <Phone className="h-4 w-4 mr-2" />
+                    Call Provider
+                  </a>
+                </Button>
+              )}
             </Card>
           ))}
         </div>
