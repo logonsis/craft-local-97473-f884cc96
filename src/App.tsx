@@ -10,6 +10,7 @@ import Notifications from "./pages/Notifications";
 import Jobs from "./pages/Jobs";
 import Network from "./pages/Network";
 import ListServices from "./pages/ListServices";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,6 +24,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/jobs" element={<Jobs />} />

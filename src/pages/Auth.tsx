@@ -67,7 +67,7 @@ const Auth = () => {
           password: validation.data.password,
           options: {
             data: { full_name: validation.data.fullName },
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
 
