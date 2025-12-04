@@ -11,6 +11,7 @@ import Jobs from "./pages/Jobs";
 import Network from "./pages/Network";
 import ListServices from "./pages/ListServices";
 import AuthCallback from "./pages/AuthCallback";
+import ProviderProfile from "./pages/ProviderProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/network" element={<Network />} />
           <Route path="/list-services" element={<ListServices />} />
+          <Route path="/provider/:providerId" element={<ProviderProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
