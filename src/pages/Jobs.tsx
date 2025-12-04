@@ -7,11 +7,12 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, Search, Phone, MessageCircle } from "lucide-react";
+import { Briefcase, Search, Phone, MessageCircle, User } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Service {
   id: string;
+  provider_id: string;
   title: string;
   description: string;
   category: string;
@@ -64,6 +65,7 @@ const Jobs = () => {
       .from("services")
       .select(`
         *,
+        provider_id,
         profiles (full_name, location, phone)
       `)
       .order("created_at", { ascending: false });
@@ -176,36 +178,47 @@ const Jobs = () => {
                 </div>
                 <p className="font-semibold text-primary">{service.price_range}</p>
               </div>
-              {service.profiles?.phone && (
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                    asChild
-                  >
-                    <a href={`tel:${service.profiles.phone}`}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      Call
-                    </a>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 text-[#25D366] border-[#25D366] hover:bg-[#25D366]/10"
-                    asChild
-                  >
-                    <a 
-                      href={`https://wa.me/${service.profiles.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi, I'm interested in your ${service.title} service.`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+              <div className="flex flex-col gap-2">
+                {service.profiles?.phone && (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      asChild
                     >
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      WhatsApp
-                    </a>
-                  </Button>
-                </div>
-              )}
+                      <a href={`tel:${service.profiles.phone}`}>
+                        <Phone className="h-4 w-4 mr-2" />
+                        Call
+                      </a>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-[#25D366] border-[#25D366] hover:bg-[#25D366]/10"
+                      asChild
+                    >
+                      <a 
+                        href={`https://wa.me/${service.profiles.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi, I'm interested in your ${service.title} service.`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        WhatsApp
+                      </a>
+                    </Button>
+                  </div>
+                )}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => navigate(`/provider/${service.provider_id}`)}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  View Profile
+                </Button>
+              </div>
             </Card>
           ))}
         </div>
