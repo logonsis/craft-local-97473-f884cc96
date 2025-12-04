@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, Search, Phone, MessageCircle, User } from "lucide-react";
+import { Briefcase, Search, Phone, MessageCircle, User, Heart } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Service {
@@ -32,6 +32,8 @@ const Jobs = () => {
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get("category") || "all");
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [userId, setUserId] = useState<string | null>(null);
 
   const categories = [
     "Plumbing",
@@ -46,7 +48,6 @@ const Jobs = () => {
 
   useEffect(() => {
     checkAuth();
-    fetchServices();
   }, []);
 
   useEffect(() => {
@@ -57,6 +58,10 @@ const Jobs = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+    } else {
+      setUserId(session.user.id);
+      fetchServices();
+      fetchFavorites(session.user.id);
     }
   };
 
@@ -78,6 +83,49 @@ const Jobs = () => {
       });
     } else {
       setServices(data || []);
+    }
+  };
+
+  const fetchFavorites = async (uid: string) => {
+    const { data } = await supabase
+      .from("favorites")
+      .select("provider_id")
+      .eq("user_id", uid);
+    
+    if (data) {
+      setFavorites(new Set(data.map(f => f.provider_id)));
+    }
+  };
+
+  const toggleFavorite = async (providerId: string) => {
+    if (!userId) return;
+
+    const isFavorited = favorites.has(providerId);
+
+    if (isFavorited) {
+      const { error } = await supabase
+        .from("favorites")
+        .delete()
+        .eq("user_id", userId)
+        .eq("provider_id", providerId);
+
+      if (!error) {
+        setFavorites(prev => {
+          const next = new Set(prev);
+          next.delete(providerId);
+          return next;
+        });
+        toast({ title: "Removed from favorites" });
+      }
+    } else {
+      const { error } = await supabase
+        .from("favorites")
+        .insert({ user_id: userId, provider_id: providerId });
+
+      if (!error) {
+        setFavorites(prev => new Set(prev).add(providerId));
+        toast({ title: "Added to favorites" });
+      }
     }
   };
 
@@ -166,9 +214,25 @@ const Jobs = () => {
             <Card key={service.id} className="p-4 hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-2">
                 <h3 className="font-semibold text-lg">{service.title}</h3>
-                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                  {service.category}
-                </span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => toggleFavorite(service.provider_id)}
+                  >
+                    <Heart
+                      className={`h-5 w-5 ${
+                        favorites.has(service.provider_id)
+                          ? "fill-red-500 text-red-500"
+                          : "text-muted-foreground"
+                      }`}
+                    />
+                  </Button>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                    {service.category}
+                  </span>
+                </div>
               </div>
               <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
               <div className="flex items-center justify-between text-sm mb-3">
