@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Phone, MessageCircle, MapPin, Briefcase, User } from "lucide-react";
+import { ArrowLeft, Phone, MessageCircle, MapPin, Briefcase, User, Heart } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Profile {
@@ -35,18 +35,63 @@ const ProviderProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuth();
-    if (providerId) {
+  }, []);
+
+  useEffect(() => {
+    if (providerId && userId) {
       fetchProviderData();
+      checkFavorite();
     }
-  }, [providerId]);
+  }, [providerId, userId]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+    } else {
+      setUserId(session.user.id);
+    }
+  };
+
+  const checkFavorite = async () => {
+    if (!userId || !providerId) return;
+    const { data } = await supabase
+      .from("favorites")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("provider_id", providerId)
+      .maybeSingle();
+    setIsFavorited(!!data);
+  };
+
+  const toggleFavorite = async () => {
+    if (!userId || !providerId) return;
+
+    if (isFavorited) {
+      const { error } = await supabase
+        .from("favorites")
+        .delete()
+        .eq("user_id", userId)
+        .eq("provider_id", providerId);
+
+      if (!error) {
+        setIsFavorited(false);
+        toast({ title: "Removed from favorites" });
+      }
+    } else {
+      const { error } = await supabase
+        .from("favorites")
+        .insert({ user_id: userId, provider_id: providerId });
+
+      if (!error) {
+        setIsFavorited(true);
+        toast({ title: "Added to favorites" });
+      }
     }
   };
 
@@ -144,14 +189,26 @@ const ProviderProfile = () => {
     <div className="min-h-screen bg-background pb-20">
       <Navigation />
       <main className="container mx-auto px-4 py-8">
-        <Button
-          variant="ghost"
-          onClick={() => navigate(-1)}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleFavorite}
+          >
+            <Heart
+              className={`h-6 w-6 ${
+                isFavorited ? "fill-red-500 text-red-500" : "text-muted-foreground"
+              }`}
+            />
+          </Button>
+        </div>
 
         {/* Profile Header */}
         <Card className="p-6 mb-6">
