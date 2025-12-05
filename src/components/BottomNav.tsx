@@ -31,13 +31,13 @@ const BottomNav = () => {
                   }`
                 }
               >
-                <div className="relative">
-                  <Icon className="h-5 w-5" />
+              <div className="relative flex flex-col items-center">
                   {item.badge && item.badge > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                    <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground mb-0.5">
                       {item.badge > 9 ? "9+" : item.badge}
                     </span>
                   )}
+                  <Icon className="h-5 w-5" />
                 </div>
                 <span className="text-xs font-medium">{item.label}</span>
               </NavLink>
