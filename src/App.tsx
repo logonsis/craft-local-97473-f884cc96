@@ -12,6 +12,7 @@ import Network from "./pages/Network";
 import ListServices from "./pages/ListServices";
 import AuthCallback from "./pages/AuthCallback";
 import ProviderProfile from "./pages/ProviderProfile";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/network" element={<Network />} />
           <Route path="/list-services" element={<ListServices />} />
           <Route path="/provider/:providerId" element={<ProviderProfile />} />
+          <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
