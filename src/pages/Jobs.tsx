@@ -48,20 +48,18 @@ const Jobs = () => {
   ];
 
   useEffect(() => {
-    checkAuth();
+    init();
   }, []);
 
   useEffect(() => {
     filterServices();
   }, [searchQuery, selectedCategory, services]);
 
-  const checkAuth = async () => {
+  const init = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
-    } else {
+    fetchServices();
+    if (session) {
       setUserId(session.user.id);
-      fetchServices();
       fetchFavorites(session.user.id);
     }
   };
@@ -99,7 +97,14 @@ const Jobs = () => {
   };
 
   const toggleFavorite = async (providerId: string) => {
-    if (!userId) return;
+    if (!userId) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save favorites",
+      });
+      navigate("/auth");
+      return;
+    }
 
     const isFavorited = favorites.has(providerId);
 
@@ -157,7 +162,11 @@ const Jobs = () => {
     }
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      // Visitors can search/filter the list locally without being signed in.
+      // We only record the search (and notify providers) when signed in.
+      return;
+    }
 
     const { error } = await supabase.from("service_searches").insert({
       searcher_id: user.id,
