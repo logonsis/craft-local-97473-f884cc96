@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, Search, Phone, MessageCircle, User, Heart } from "lucide-react";
+import { Briefcase, Search, Phone, MessageCircle, User, Heart, Clock } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface Service {
@@ -17,6 +17,7 @@ interface Service {
   description: string;
   category: string;
   price_range: string;
+  availability: string | null;
   profiles: {
     full_name: string;
     location: string;
@@ -242,6 +243,12 @@ const Jobs = () => {
                 </div>
                 <p className="font-semibold text-primary">{service.price_range}</p>
               </div>
+              {service.availability && (
+                <div className="flex items-center gap-2 text-sm text-primary mb-3">
+                  <Clock className="h-4 w-4" />
+                  <span className="font-medium">{service.availability}</span>
+                </div>
+              )}
               <div className="flex flex-col gap-2">
                 {service.profiles?.phone && (
                   <div className="flex gap-2">
