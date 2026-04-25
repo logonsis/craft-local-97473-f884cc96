@@ -35,6 +35,7 @@ interface Profile {
   location: string | null;
   bio: string | null;
   avatar_url: string | null;
+  is_available?: boolean;
 }
 
 const Profile = () => {
@@ -78,6 +79,7 @@ const Profile = () => {
 
       if (data) {
         setProfile(data);
+        setIsAvailable((data as any).is_available ?? true);
         setFormData({
           full_name: data.full_name || "",
           phone: data.phone || "",
