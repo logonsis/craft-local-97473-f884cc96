@@ -25,7 +25,8 @@ import {
   Star,
   Edit2,
   Camera,
-  Loader2
+  Loader2,
+  Calendar
 } from "lucide-react";
 
 interface Profile {
@@ -307,6 +308,15 @@ const Profile = () => {
                     <span>{profile?.id || "No email"}</span>
                   </div>
                 </div>
+
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => navigate("/bookings")}
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  My Appointments
+                </Button>
 
                 <div className="pt-4 border-t">
                   <h4 className="text-sm font-semibold mb-2">Skills</h4>
