@@ -18,10 +18,11 @@ export const useNotifications = () => {
 
   useEffect(() => {
     fetchNotifications();
-    
-    // Set up realtime subscription
+
+    // Unique channel name to avoid duplicate subscription errors (e.g. StrictMode double-mount)
+    const channelName = `notifications-changes-${Math.random().toString(36).slice(2)}`;
     const channel = supabase
-      .channel('notifications-changes')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
