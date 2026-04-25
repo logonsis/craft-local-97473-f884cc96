@@ -13,6 +13,7 @@ import ListServices from "./pages/ListServices";
 import AuthCallback from "./pages/AuthCallback";
 import ProviderProfile from "./pages/ProviderProfile";
 import Admin from "./pages/Admin";
+import Bookings from "./pages/Bookings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/list-services" element={<ListServices />} />
           <Route path="/provider/:providerId" element={<ProviderProfile />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/bookings" element={<Bookings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

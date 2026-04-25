@@ -202,6 +202,7 @@ export type Database = {
           category: string
           created_at: string | null
           description: string | null
+          hourly_rate: number | null
           id: string
           price_range: string | null
           provider_id: string
@@ -213,6 +214,7 @@ export type Database = {
           category: string
           created_at?: string | null
           description?: string | null
+          hourly_rate?: number | null
           id?: string
           price_range?: string | null
           provider_id: string
@@ -224,6 +226,7 @@ export type Database = {
           category?: string
           created_at?: string | null
           description?: string | null
+          hourly_rate?: number | null
           id?: string
           price_range?: string | null
           provider_id?: string

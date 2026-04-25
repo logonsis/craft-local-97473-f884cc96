@@ -54,6 +54,7 @@ const serviceSchema = z.object({
   category: z.enum(SERVICE_CATEGORIES, { required_error: "Category is required" }),
   price_range: z.string().trim().max(50, "Price range must be less than 50 characters").optional(),
   availability: z.string().trim().max(100, "Availability must be less than 100 characters").optional(),
+  hourly_rate: z.string().trim().optional(),
 });
 
 interface Service {
@@ -63,6 +64,7 @@ interface Service {
   category: string;
   price_range: string | null;
   availability: string | null;
+  hourly_rate: number | null;
   provider_id: string;
   created_at: string;
   updated_at: string;
@@ -81,6 +83,7 @@ const ServiceManagement = () => {
     category: "" as typeof SERVICE_CATEGORIES[number] | "",
     price_range: "",
     availability: "",
+    hourly_rate: "",
   });
 
   useEffect(() => {
@@ -127,12 +130,13 @@ const ServiceManagement = () => {
           category: validated.category,
           price_range: validated.price_range || null,
           availability: validated.availability || null,
+          hourly_rate: validated.hourly_rate ? parseFloat(validated.hourly_rate) : null,
         });
 
       if (error) throw error;
 
       toast.success("Service added successfully");
-      setFormData({ title: "", description: "", category: "", price_range: "", availability: "" });
+      setFormData({ title: "", description: "", category: "", price_range: "", availability: "", hourly_rate: "" });
       setIsAddDialogOpen(false);
       fetchServices();
     } catch (error) {
@@ -159,6 +163,7 @@ const ServiceManagement = () => {
           category: validated.category,
           price_range: validated.price_range || null,
           availability: validated.availability || null,
+          hourly_rate: validated.hourly_rate ? parseFloat(validated.hourly_rate) : null,
         })
         .eq('id', currentService.id);
 
@@ -167,7 +172,7 @@ const ServiceManagement = () => {
       toast.success("Service updated successfully");
       setIsEditDialogOpen(false);
       setCurrentService(null);
-      setFormData({ title: "", description: "", category: "", price_range: "", availability: "" });
+      setFormData({ title: "", description: "", category: "", price_range: "", availability: "", hourly_rate: "" });
       fetchServices();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -205,12 +210,13 @@ const ServiceManagement = () => {
       category: service.category as typeof SERVICE_CATEGORIES[number],
       price_range: service.price_range || "",
       availability: service.availability || "",
+      hourly_rate: service.hourly_rate != null ? String(service.hourly_rate) : "",
     });
     setIsEditDialogOpen(true);
   };
 
   const openAddDialog = () => {
-    setFormData({ title: "", description: "", category: "", price_range: "", availability: "" });
+    setFormData({ title: "", description: "", category: "", price_range: "", availability: "", hourly_rate: "" });
     setIsAddDialogOpen(true);
   };
 
@@ -281,6 +287,17 @@ const ServiceManagement = () => {
                 />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="service-hourly">Hourly Charge (₹/hr)</Label>
+                <Input
+                  id="service-hourly"
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="e.g., 500"
+                  value={formData.hourly_rate}
+                  onChange={(e) => setFormData({ ...formData, hourly_rate: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="service-availability">Availability</Label>
                 <Input
                   id="service-availability"
@@ -322,6 +339,7 @@ const ServiceManagement = () => {
                     )}
                     <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
                       {service.price_range && <span>💰 {service.price_range}</span>}
+                      {service.hourly_rate != null && <span>⏱️ ₹{service.hourly_rate}/hr</span>}
                       {service.availability && <span>🕒 {service.availability}</span>}
                     </div>
                   </div>
@@ -401,6 +419,17 @@ const ServiceManagement = () => {
                 onChange={(e) => setFormData({ ...formData, price_range: e.target.value })}
               />
             </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-service-hourly">Hourly Charge (₹/hr)</Label>
+                <Input
+                  id="edit-service-hourly"
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="e.g., 500"
+                  value={formData.hourly_rate}
+                  onChange={(e) => setFormData({ ...formData, hourly_rate: e.target.value })}
+                />
+              </div>
             <div className="space-y-2">
               <Label htmlFor="edit-service-availability">Availability</Label>
               <Input
