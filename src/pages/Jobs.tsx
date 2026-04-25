@@ -7,8 +7,11 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, Search, Phone, MessageCircle, User, Heart, Clock } from "lucide-react";
+import { Briefcase, Search, Phone, MessageCircle, User, Heart, Clock, CalendarPlus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Service {
   id: string;
@@ -22,6 +25,7 @@ interface Service {
     full_name: string;
     location: string;
     phone: string | null;
+    is_available: boolean;
   };
 }
 
@@ -35,6 +39,14 @@ const Jobs = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get("category") || "all");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
+  const [bookingService, setBookingService] = useState<Service | null>(null);
+  const [bookingForm, setBookingForm] = useState({
+    customer_name: "",
+    customer_phone: "",
+    preferred_date: "",
+    message: "",
+  });
+  const [submittingBooking, setSubmittingBooking] = useState(false);
 
   const categories = [
     "Plumbing",
@@ -70,7 +82,7 @@ const Jobs = () => {
       .select(`
         *,
         provider_id,
-        profiles (full_name, location, phone)
+        profiles (full_name, location, phone, is_available)
       `)
       .order("created_at", { ascending: false });
 
@@ -82,6 +94,41 @@ const Jobs = () => {
       });
     } else {
       setServices(data || []);
+    }
+  };
+
+  const openBooking = (service: Service) => {
+    if (!userId) {
+      toast({ title: "Sign in required", description: "Please sign in to book an appointment" });
+      navigate("/auth");
+      return;
+    }
+    setBookingForm({ customer_name: "", customer_phone: "", preferred_date: "", message: "" });
+    setBookingService(service);
+  };
+
+  const submitBooking = async () => {
+    if (!bookingService || !userId) return;
+    if (!bookingForm.customer_name || !bookingForm.customer_phone || !bookingForm.preferred_date) {
+      toast({ title: "Missing info", description: "Please fill in name, phone and date", variant: "destructive" });
+      return;
+    }
+    setSubmittingBooking(true);
+    const { error } = await supabase.from("bookings").insert({
+      provider_id: bookingService.provider_id,
+      customer_id: userId,
+      service_id: bookingService.id,
+      customer_name: bookingForm.customer_name,
+      customer_phone: bookingForm.customer_phone,
+      preferred_date: new Date(bookingForm.preferred_date).toISOString(),
+      message: bookingForm.message || null,
+    });
+    setSubmittingBooking(false);
+    if (error) {
+      toast({ title: "Booking failed", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Booking requested", description: "The provider has been notified." });
+      setBookingService(null);
     }
   };
 
@@ -258,8 +305,18 @@ const Jobs = () => {
                   <span className="font-medium">{service.availability}</span>
                 </div>
               )}
+              <div className="mb-3">
+                <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full ${
+                  service.profiles?.is_available
+                    ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                    : "bg-muted text-muted-foreground"
+                }`}>
+                  <span className={`h-2 w-2 rounded-full ${service.profiles?.is_available ? "bg-green-500" : "bg-muted-foreground"}`} />
+                  {service.profiles?.is_available ? "Available now" : "Unavailable — book appointment"}
+                </span>
+              </div>
               <div className="flex flex-col gap-2">
-                {service.profiles?.phone && (
+                {service.profiles?.is_available && service.profiles?.phone ? (
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -288,6 +345,15 @@ const Jobs = () => {
                       </a>
                     </Button>
                   </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => openBooking(service)}
+                  >
+                    <CalendarPlus className="h-4 w-4 mr-2" />
+                    Book Appointment
+                  </Button>
                 )}
                 <Button
                   variant="secondary"
@@ -311,6 +377,60 @@ const Jobs = () => {
         )}
       </main>
       <BottomNav />
+
+      <Dialog open={!!bookingService} onOpenChange={(open) => !open && setBookingService(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Book Appointment</DialogTitle>
+            <DialogDescription>
+              Request an appointment with {bookingService?.profiles?.full_name} for {bookingService?.title}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="customer_name">Your Name</Label>
+              <Input
+                id="customer_name"
+                value={bookingForm.customer_name}
+                onChange={(e) => setBookingForm({ ...bookingForm, customer_name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="customer_phone">Phone Number</Label>
+              <Input
+                id="customer_phone"
+                type="tel"
+                value={bookingForm.customer_phone}
+                onChange={(e) => setBookingForm({ ...bookingForm, customer_phone: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="preferred_date">Preferred Date & Time</Label>
+              <Input
+                id="preferred_date"
+                type="datetime-local"
+                value={bookingForm.preferred_date}
+                onChange={(e) => setBookingForm({ ...bookingForm, preferred_date: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="message">Message (optional)</Label>
+              <Textarea
+                id="message"
+                placeholder="Describe what you need..."
+                value={bookingForm.message}
+                onChange={(e) => setBookingForm({ ...bookingForm, message: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBookingService(null)}>Cancel</Button>
+            <Button onClick={submitBooking} disabled={submittingBooking}>
+              {submittingBooking ? "Sending..." : "Send Request"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
