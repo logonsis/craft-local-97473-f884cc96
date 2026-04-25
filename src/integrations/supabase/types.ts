@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          created_at: string
+          customer_id: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          message: string | null
+          preferred_date: string
+          provider_id: string
+          service_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          customer_name: string
+          customer_phone: string
+          id?: string
+          message?: string | null
+          preferred_date: string
+          provider_id: string
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          message?: string | null
+          preferred_date?: string
+          provider_id?: string
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -90,6 +132,7 @@ export type Database = {
           created_at: string | null
           full_name: string | null
           id: string
+          is_available: boolean
           location: string | null
           phone: string | null
           updated_at: string | null
@@ -100,6 +143,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id: string
+          is_available?: boolean
           location?: string | null
           phone?: string | null
           updated_at?: string | null
@@ -110,6 +154,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string
+          is_available?: boolean
           location?: string | null
           phone?: string | null
           updated_at?: string | null
