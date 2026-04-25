@@ -35,6 +35,7 @@ interface Profile {
   location: string | null;
   bio: string | null;
   avatar_url: string | null;
+  is_available?: boolean;
 }
 
 const Profile = () => {
@@ -78,6 +79,7 @@ const Profile = () => {
 
       if (data) {
         setProfile(data);
+        setIsAvailable((data as any).is_available ?? true);
         setFormData({
           full_name: data.full_name || "",
           phone: data.phone || "",
@@ -274,7 +276,20 @@ const Profile = () => {
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={isAvailable}
-                      onCheckedChange={setIsAvailable}
+                      onCheckedChange={async (checked) => {
+                        setIsAvailable(checked);
+                        if (!profile) return;
+                        const { error } = await supabase
+                          .from("profiles")
+                          .update({ is_available: checked })
+                          .eq("id", profile.id);
+                        if (error) {
+                          toast({ title: "Failed to update", description: error.message, variant: "destructive" });
+                          setIsAvailable(!checked);
+                        } else {
+                          toast({ title: checked ? "You're now available" : "You're now busy" });
+                        }
+                      }}
                     />
                     <span className="text-sm text-muted-foreground">
                       {isAvailable ? "Available" : "Busy"}
