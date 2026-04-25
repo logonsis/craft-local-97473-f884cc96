@@ -20,6 +20,7 @@ interface Service {
   description: string;
   category: string;
   price_range: string;
+  hourly_rate: number | null;
   availability: string | null;
   profiles: {
     full_name: string;
@@ -297,7 +298,14 @@ const Jobs = () => {
                   <p className="font-medium">{service.profiles?.full_name}</p>
                   <p className="text-muted-foreground">{service.profiles?.location}</p>
                 </div>
-                <p className="font-semibold text-primary">{service.price_range}</p>
+                <div className="text-right">
+                  {service.hourly_rate != null && (
+                    <p className="font-semibold text-primary">₹{service.hourly_rate}/hr</p>
+                  )}
+                  {service.price_range && (
+                    <p className="text-xs text-muted-foreground">{service.price_range}</p>
+                  )}
+                </div>
               </div>
               {service.availability && (
                 <div className="flex items-center gap-2 text-sm text-primary mb-3">
